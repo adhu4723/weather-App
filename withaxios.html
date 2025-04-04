@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather App (Axios)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Axios CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-400 to-indigo-600 min-h-screen flex items-center justify-center p-4">
+
+  <div class="bg-white p-6 rounded-2xl shadow-xl max-w-md w-full text-center">
+    <h1 class="text-2xl font-bold mb-4 text-gray-800">🌦️ Weather App (Axios)</h1>
+
+    <input
+      type="text"
+      id="cityInput"
+      placeholder="Enter city (e.g. Kannur)"
+      class="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+    />
+
+    <button
+      onclick="getWeather()"
+      class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition w-full"
+    >
+      Get Weather
+    </button>
+
+    <div id="weatherInfo" class="mt-6 text-gray-700"></div>
+  </div>
+
+  <script>
+    async function getWeather() {
+      const city = document.getElementById("cityInput").value.trim();
+      const weatherDiv = document.getElementById("weatherInfo");
+
+      if (!city) {
+        weatherDiv.innerHTML = `<p class="text-red-500">Please enter a city name.</p>`;
+        return;
+      }
+
+      const apiKey = "b99e484dba8e4a3d8c733403250404";
+      const url = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}&aqi=no`;
+
+      // Show loading spinner
+      weatherDiv.innerHTML = `
+        <div class="flex justify-center">
+          <div class="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+        </div>
+        <p class="text-sm text-gray-500 mt-2">Fetching weather for "${city}"...</p>
+      `;
+
+      try {
+        const response = await axios.get(url);
+        const data = response.data;
+
+        weatherDiv.innerHTML = `
+          <h2 class="text-xl font-semibold">${data.location.name}, ${data.location.country}</h2>
+          <img src="https:${data.current.condition.icon}" alt="${data.current.condition.text}" class="mx-auto my-2" />
+          <p class="text-lg">${data.current.temp_c}°C - ${data.current.condition.text}</p>
+          <p class="text-sm text-gray-500">Feels like: ${data.current.feelslike_c}°C</p>
+          <p class="text-xs text-gray-400 mt-2">Local time: ${data.location.localtime}</p>
+        `;
+      } catch (error) {
+        weatherDiv.innerHTML = `<p class="text-red-500 mt-4">❌ ${error.response?.data?.error?.message || 'Something went wrong!'}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
